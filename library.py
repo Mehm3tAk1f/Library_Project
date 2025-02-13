@@ -8,8 +8,16 @@ def main():
     root = tk.Tk()
     root.title("Library Management System")
 
+    # Left Side Frames
+    left_frame = ttk.Frame(root)
+    left_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+    # Right Side Frames
+    right_frame = ttk.Frame(root)
+    right_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+
     # Add Book Frame
-    add_book_frame = ttk.LabelFrame(root, text="Add Book")
+    add_book_frame = ttk.LabelFrame(left_frame, text="Add Book")
     add_book_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
     ttk.Label(add_book_frame, text="Serial Number:").grid(row=0, column=0, padx=5, pady=5)
@@ -46,7 +54,7 @@ def main():
     ttk.Button(add_book_frame, text="Add Book", command=add_book_command).grid(row=5, column=0, columnspan=2, pady=10)
 
     # Search Book by Serial Number Frame
-    search_book_frame = ttk.LabelFrame(root, text="Search Book by Serial Number")
+    search_book_frame = ttk.LabelFrame(left_frame, text="Search Book by Serial Number")
     search_book_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
     ttk.Label(search_book_frame, text="Serial Number:").grid(row=0, column=0, padx=5, pady=5)
@@ -64,7 +72,7 @@ def main():
     ttk.Button(search_book_frame, text="Search Book", command=search_book_command).grid(row=1, column=0, columnspan=2, pady=10)
 
     # Search Book by Author Name Frame
-    search_author_frame = ttk.LabelFrame(root, text="Search Book by Author Name")
+    search_author_frame = ttk.LabelFrame(left_frame, text="Search Book by Author Name")
     search_author_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
 
     ttk.Label(search_author_frame, text="Author Name:").grid(row=0, column=0, padx=5, pady=5)
@@ -82,8 +90,8 @@ def main():
     ttk.Button(search_author_frame, text="Search Book", command=search_author_command).grid(row=1, column=0, columnspan=2, pady=10)
 
     # Show All Books Frame
-    show_all_books_frame = ttk.LabelFrame(root, text="All Books")
-    show_all_books_frame.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
+    show_all_books_frame = ttk.LabelFrame(right_frame, text="All Books")
+    show_all_books_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
     books_listbox = tk.Listbox(show_all_books_frame, width=50)
     books_listbox.grid(row=0, column=0, padx=5, pady=5)
@@ -96,6 +104,21 @@ def main():
                 books_listbox.insert(tk.END, row)
 
     ttk.Button(show_all_books_frame, text="Show All Books", command=show_all_books_command).grid(row=1, column=0, pady=10)
+
+    # Who Has Book Frame
+    who_has_book_frame = ttk.LabelFrame(right_frame, text="Who Has Book")
+    who_has_book_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+
+    ttk.Label(who_has_book_frame, text="Book Name:").grid(row=0, column=0, padx=5, pady=5)
+    who_has_book_book_name_entry = ttk.Entry(who_has_book_frame)
+    who_has_book_book_name_entry.grid(row=0, column=1, padx=5, pady=5)
+
+    def who_has_book_command():
+        book_name = who_has_book_book_name_entry.get()
+        result = who_has_book(book_name)
+        messagebox.showinfo("Book Status", result)
+
+    ttk.Button(who_has_book_frame, text="Check Book Status", command=who_has_book_command).grid(row=1, column=0, columnspan=2, pady=10)
 
     root.mainloop()
 
@@ -132,6 +155,32 @@ def show_all_books():
         reader = csv.reader(file)
         for row in reader:
             print(row)
+
+def who_has_book(book_name):
+    with open('books.csv', mode='r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if row[4].upper() == book_name.upper():
+                if row[5] == "": #if the book is available.
+                    return "Book is available in the library."
+                else:
+                    #the name of the person who has the book.
+                    student = book_to_owner(row[0])
+                    return f"{row[4]} is with {student}."
+        #any problems with the serial number.
+        return "Book not found."
+    
+def book_to_owner(serial_number):
+    with open('students.csv', mode='r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if row[2] == serial_number:
+                return row[1]
+            elif row[3] == serial_number:
+                return row[1]
+            elif row[4] == serial_number:
+                return row[1]
+        return False
 
 if __name__ == "__main__":
     main()
